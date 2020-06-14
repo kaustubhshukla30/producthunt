@@ -1,7 +1,8 @@
 from django.shortcuts import render,redirect,get_object_or_404
 from django.contrib.auth.decorators import login_required
 from .models import Product
-from django.utils import timezone
+from django.utils import timezone   
+from django.utils.datastructures import MultiValueDictKeyError
 
 # Create your views here.
 def home(request):
@@ -11,7 +12,11 @@ def home(request):
 @login_required(login_url="/accounts/signup")
 def create(request):
     if request.method == 'POST':
-        if request.POST['title'] and request.POST['body'] and request.POST['url'] and request.FILES['image']:
+        if request.POST['title'] and request.POST['body'] and request.POST['url']:
+            try: 
+                fm = request.FILES['image']
+            except MultiValueDictKeyError:
+                return render(request, 'product/create.html',{'error_message':'All fields are required.'})
             product = Product()
             product.title = request.POST['title']
             product.body = request.POST['body']
